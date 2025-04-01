@@ -41,6 +41,22 @@ public_users.get('/author/:author', function (req, res) {
   return res.send(JSON.stringify(enumeratedBooks, null, 4));
 });
 
+
+// Get book details based on title
+public_users.get('/title/:title', function (req, res) {
+  const title = req.params.title;
+  const booksByTitle = Object.values(books).filter(book => book.title === title);
+
+  const enumeratedBooks = booksByTitle.map((book, index) => {
+    return {
+      id: index + 1, // Start index from 1
+      ...book, // Spread the original book properties
+    };
+  });
+
+  return res.send(JSON.stringify(enumeratedBooks, null, 4));
+});
+
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
   //Write your code here
