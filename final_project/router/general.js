@@ -4,6 +4,8 @@ const { JsonWebTokenError } = require('jsonwebtoken');
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const axios = require('axios');
+
 
 
 // Check if a user with the given username already exists
@@ -42,10 +44,33 @@ public_users.post("/register", (req, res) => {
   }
 });
 
+
+
+
+
+
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
   return res.send(JSON.stringify(books, null, 4));
 });
+
+// Book details using Async/Await with Axios
+public_users.get('/books-axios-async', async function (req, res) {
+  try {
+    const response = await axios.get('http://localhost:5000/');
+    return res.send(JSON.stringify(response.data, null, 4));
+  } catch (error) {
+    console.error("Async Route Error:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+
+
+
+
+
+
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
@@ -56,6 +81,30 @@ public_users.get('/isbn/:isbn', function (req, res) {
     return res.status(404).json({ message: "Book not found." });
   }
 });
+
+
+// Get book details based on ISBN (Async/Await)
+public_users.get('/isbn-async/:isbn', async function (req, res) {
+  try {
+    const isbn = req.params.isbn; // Get the ISBN from the request parameters
+
+    // Check if the book exists in the 'books' object
+    if (!books[isbn]) {
+      return res.status(404).json({ message: "Book not found." });
+    }
+
+    // Send the book details as JSON
+    return res.send(JSON.stringify(books[isbn], null, 4));
+  } catch (error) {
+    console.error("Async Route Error:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+
+
+
+
 
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
@@ -71,6 +120,30 @@ public_users.get('/author/:author', function (req, res) {
 
   return res.send(JSON.stringify(enumeratedBooks, null, 4));
 });
+
+
+
+// Get book details based on Author (Async/Await)
+public_users.get('/author-async/:author', async function (req, res) {
+  try {
+    const author = req.params.author;
+    const booksByAuthor = Object.values(books).filter(book => book.author === author);
+
+    if (booksByAuthor.length === 0) {
+      return res.status(404).json({ message: "No books found for this author." });
+    }
+
+    return res.send(JSON.stringify(booksByAuthor, null, 4));
+  } catch (error) {
+    console.error("Async Route Error:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+
+
+
+
 
 
 // Get book details based on title
@@ -89,6 +162,34 @@ public_users.get('/title/:title', function (req, res) {
   return res.send(JSON.stringify(enumeratedBooks, null, 4));
 });
 
+
+
+// Get book details based on Title (Async/Await)
+public_users.get('/title-async/:title', async function (req, res) {
+  try {
+    const title = req.params.title;
+    const booksByTitle = Object.values(books).filter(book => book.title === title);
+
+    if (booksByTitle.length === 0) {
+      return res.status(404).json({ message: "No books found for this author." });
+    }
+
+    return res.send(JSON.stringify(booksByTitle, null, 4));
+  } catch (error) {
+    console.error("Async Route Error:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+
+
+
+
+
+
+
+
+
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
   const isbn = req.params.isbn;
@@ -100,6 +201,11 @@ public_users.get('/review/:isbn', function (req, res) {
     }
   }
 });
+
+
+
+
+
 
 
 module.exports.general = public_users;
